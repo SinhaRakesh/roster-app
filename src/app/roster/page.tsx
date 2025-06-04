@@ -1,11 +1,11 @@
 "use client";
-import Image from "next/image";
 import { useState } from "react"; // Import useState and useEffect
 
 export default function Home() {
   const [url, setUrl] = useState(""); // State for the URL input
   const [loading, setLoading] = useState(false); // State for loading
   const [error, setError] = useState(""); // State for error handling
+  const [profile, setProfile] = useState<any>(null);
 
   const apiEndPoint = "http://localhost:3001/users/process-portfolio";
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,8 +28,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      // Handle the response data as needed
-      console.log(data);
+      setProfile(data.parsedJsonData);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message); // Set error message if API call fails
@@ -71,6 +70,74 @@ export default function Home() {
         {error && <p className="text-red-500 text-sm">{error}</p>}{" "}
         {/* Show error message */}
       </form>
+
+      {profile && (
+        <div className="max-w-2xl mx-auto mt-8 bg-white shadow-lg rounded-lg p-6">
+          <h2 className="text-2xl font-bold mb-2">{profile.name}</h2>
+          <p className="text-blue-600 font-semibold mb-4">{profile.title}</p>
+          <div className="mb-4">
+            <h3 className="font-semibold">Contact</h3>
+            <ul className="text-gray-700">
+              <li>Email: {profile.contact?.email || "N/A"}</li>
+              <li>Phone: {profile.contact?.phone || "N/A"}</li>
+              <li>LinkedIn: {profile.contact?.linkedin || "N/A"}</li>
+            </ul>
+          </div>
+          <div className="mb-4">
+            <h3 className="font-semibold">Skills</h3>
+            <ul className="flex flex-wrap gap-2">
+              {profile.skills?.map((skill: string, idx: number) => (
+                <li
+                  key={idx}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                >
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="mb-4">
+            <h3 className="font-semibold">Experience</h3>
+            <p className="text-gray-700 mb-1">{profile.experience?.details}</p>
+            <p className="text-gray-500 text-sm">
+              Years: {profile.experience?.years}
+            </p>
+            <div>
+              <span className="font-semibold">Clients:</span>
+              <ul className="list-disc ml-6">
+                {profile.experience?.clients?.map(
+                  (client: string, idx: number) => (
+                    <li key={idx}>{client}</li>
+                  )
+                )}
+              </ul>
+            </div>
+          </div>
+          <div className="mb-4">
+            <h3 className="font-semibold">Testimonials</h3>
+            <ul>
+              {profile.testimonials?.map((t: any, idx: number) => (
+                <li key={idx} className="mb-3">
+                  <blockquote className="italic text-gray-800">
+                    "{t.text}"
+                  </blockquote>
+                  <span className="block text-sm text-gray-600 mt-1">
+                    - {t.author}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold">Additional Info</h3>
+            <ul className="list-disc ml-6">
+              {profile.additional_info?.map((info: string, idx: number) => (
+                <li key={idx}>{info}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
